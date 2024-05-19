@@ -19,3 +19,11 @@ Install `zinit`:
 $ bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
 ```
 
+## Tools
+Zellij:
+```
+$ wget https://github.com/zellij-org/zellij/releases/download/v0.40.1/zellij-x86_64-unknown-linux-musl.tar.gz
+$ tar -xvf zellij-x86_64-unknown-linux-musl.tar.gz
+$ mv zellij /usr/local/bin/
+```
+
