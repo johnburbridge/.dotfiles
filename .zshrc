@@ -44,6 +44,13 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
+# Plugin history-search-multi-word loaded with investigating.
+zinit load zdharma-continuum/history-search-multi-word
+
+# Two regular plugins loaded without investigating.
+zinit light zsh-users/zsh-autosuggestions
+zinit light zdharma-continuum/fast-syntax-highlighting
+
 ### End of Zinit's installer chunk
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
