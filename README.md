@@ -4,6 +4,11 @@ A repository with zsh and other .dotfile configurations.
 
 ## Setup
 
+Install Homebrew:
+```
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
 Install `stow`:
 ```
 $ brew install stow
