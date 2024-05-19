@@ -20,10 +20,18 @@ $ bash -c "$(curl --fail --show-error --silent --location https://raw.githubuser
 ```
 
 ## Tools
+
 Zellij:
+
 ```
 $ wget https://github.com/zellij-org/zellij/releases/download/v0.40.1/zellij-x86_64-unknown-linux-musl.tar.gz
 $ tar -xvf zellij-x86_64-unknown-linux-musl.tar.gz
 $ mv zellij /usr/local/bin/
 ```
 
+Helix:
+```
+$ sudo add-apt-repository ppa:maveonair/helix-editor
+$ sudo apt update
+$ sudo apt install helix
+```
