@@ -5,24 +5,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Lines configured by zsh-newuser-install
-HISTFILE=~/.histfile
-HISTSIZE=5000
-SAVEHIST=5000
-bindkey -v
-# End of lines configured by zsh-newuser-install
-# The following lines were added by compinstall
-zstyle :compinstall filename '/home/jburbridge/.zshrc'
-
-autoload -Uz compinit
-compinit
-# End of lines added by compinstall
-
-alias l='ls -l --color'
-alias la='l -a'
-alias lah='la -h'
-
-
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
     print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
@@ -33,8 +15,8 @@ if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
 fi
 
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+
+zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 # Load a few important annexes, without Turbo
 # (this is currently required for annexes)
@@ -48,18 +30,49 @@ zinit light-mode for \
 zinit load zdharma-continuum/history-search-multi-word
 
 # Two regular plugins loaded without investigating.
-zinit light zsh-users/zsh-autosuggestions
 zinit light zdharma-continuum/fast-syntax-highlighting
-
-### End of Zinit's installer chunk
-
-zinit ice depth=1; zinit light romkatv/powerlevel10k
+zinit light zsh-users/zsh-completions
+zinit light zsh-users/zsh-autosuggestions
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 #[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-#brew_prefix=$(brew --prefix)
-#eval "$($brew_prefix/bin/brew shellenv)"
+brew_prefix=$(brew --prefix)
+eval "$($brew_prefix/bin/brew shellenv)"
 #source $brew_prefix/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+bindkey -v
+
+HISTFILE=~/.zsh_history
+HISTSIZE=5000
+SAVEHIST=$HISTSIZE
+HISTDUPE=erase
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space 
+setopt hist_ignore_all_dups
+setopt hist_save_no_dups
+setopt hist_ignore_dups
+setopt hist_find_no_dups
+
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle :compinstall filename '/home/jburbridge/.zshrc'
+
+autoload -Uz compinit
+compinit
+
+alias ls='ls --color'
+alias l='ls -l'
+alias la='l -a'
+alias lah='la -h'
+
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+zinit cdreplay -q
+
+### End of Zinit's installer chunk
+
