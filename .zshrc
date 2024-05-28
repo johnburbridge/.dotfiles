@@ -36,7 +36,8 @@ zinit light zsh-users/zsh-autosuggestions
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 #[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-if [ ! -z $(which brew) ]; then
+homebrew_path=$(which brew)
+if [ -x "$homebrew_path" ] ; then
     brew_prefix=$(brew --prefix)
     eval "$($brew_prefix/bin/brew shellenv)"
 fi
