@@ -1,1 +1,2 @@
 .local/share/zinit/plugins/**
+.local/share/zinit/completions/**
