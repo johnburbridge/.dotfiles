@@ -1,5 +1,9 @@
 # This is the default format
-format = '$all'
+#format = '$all'
+format = """
+[╭─](#464646) $os$hostname$all\
+[╰─](#464646)$character\
+"""
 
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
@@ -32,7 +36,13 @@ symbol = " "
 symbol = " "
 
 [directory]
+format = '[ ]($style)[$path]($style)[$read_only]($read_only_style) '
 read_only = " 󰌾"
+repo_root_style = "bold bright-green"
+style = "bright-green"
+truncation_symbol = "…/"
+# truncate_to_repo = false
+# fish_style_pwd_dir_length = 1
 
 [docker_context]
 symbol = " "
@@ -49,11 +59,18 @@ symbol = " "
 [fossil_branch]
 symbol = " "
 
+[gcloud]
+disabled = true
+
 [git_branch]
 symbol = " "
+style = "31"
 
 [golang]
 symbol = " "
+
+[gradle]
+disabled = true
 
 [guix_shell]
 symbol = " "
@@ -69,9 +86,11 @@ symbol = " "
 
 [hostname]
 ssh_symbol = " "
+disabled = false
 
 [java]
 symbol = " "
+disabled = true
 
 [julia]
 symbol = " "
@@ -99,6 +118,9 @@ symbol = " "
 
 [ocaml]
 symbol = " "
+
+[os]
+disabled = false
 
 [os.symbols]
 Alpaquita = " "
