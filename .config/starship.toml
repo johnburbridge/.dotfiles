@@ -66,6 +66,9 @@ disabled = true
 symbol = " "
 style = "31"
 
+[git_status]
+style = "#fa7055"
+
 [golang]
 symbol = " "
 
