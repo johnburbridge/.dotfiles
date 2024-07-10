@@ -13,3 +13,4 @@ brew install stow
 brew install font-jetbrains-mono-nerd-font
 brew install starship
 brew install zellij
+brew install zsh-autosuggestions

@@ -27,4 +27,6 @@ alias lah='la -h'
 # autoload -Uz _zinit
 # (( ${+_comps} )) && _comps[zinit]=_zinit
 
+# export STARSHIP_CONFIG=~/.config/starship-gruvbox.toml
 eval "$(starship init zsh)"
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
