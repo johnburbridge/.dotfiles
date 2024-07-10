@@ -9,8 +9,9 @@ fi
 
 echo $homebrew_prefix
 
-brew install stow
 brew install font-jetbrains-mono-nerd-font
 brew install starship
+brew install stow
 brew install zellij
 brew install zsh-autosuggestions
+brew install zsh-fast-syntax-highlighting
