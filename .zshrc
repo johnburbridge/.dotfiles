@@ -16,8 +16,12 @@ setopt hist_find_no_dups
 # zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # zstyle :compinstall filename '/home/jburbridge/.zshrc'
 
-autoload -Uz compinit
-compinit
+# autoload -Uz compinit
+# compinit
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
+complete -C '/usr/local/bin/aws_completer' aws
+
 
 alias ls='ls --color'
 alias l='ls -l'
