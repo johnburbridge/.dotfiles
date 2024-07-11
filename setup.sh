@@ -15,3 +15,4 @@ brew install stow
 brew install zellij
 brew install zsh-autosuggestions
 brew install zsh-fast-syntax-highlighting
+brew install zsh-autocomplete
