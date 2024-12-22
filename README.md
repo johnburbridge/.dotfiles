@@ -1,40 +1,31 @@
 # .dotfiles
 
-A repository with zsh and other .dotfile configurations.
+My terminal tools and configuration:
+* starship
+* zellij
+* helix
+* and other goodies...
+
+Coincidentally they're all written in Rust.
 
 ## Setup
 
-Install Homebrew:
-```
-$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
+1. Install Homebrew:
+  ```
+  $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ```
 
-Install `stow`:
-```
-$ brew install stow
-```
+2. Clone this repository:
+  ```
+  $ git clone git@github.com:johnburbridge/.dotfiles.git
+  ```
 
-Clone this repository:
-```
-$ git clone git@github.com:johnburbridge/.dotfiles.git
-```
+3. Run `setup.sh` to install required tools:
+  ```
+  $ cd .dotfiles/ && ./setup.sh
+  ```
 
-Install `zinit`:
-```
-$ bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
-```
-
-## Tools
-
-Zellij:
-
-```
-$ wget https://github.com/zellij-org/zellij/releases/download/v0.40.1/zellij-x86_64-unknown-linux-musl.tar.gz
-$ tar -xvf zellij-x86_64-unknown-linux-musl.tar.gz
-$ mv zellij /usr/local/bin/
-```
-
-Helix:
+Helix
 ```
 $ sudo add-apt-repository ppa:maveonair/helix-editor
 $ sudo apt update
