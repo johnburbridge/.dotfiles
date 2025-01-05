@@ -10,24 +10,24 @@ Coincidentally they're all written in Rust.
 
 ## Setup
 
-1. Install Homebrew:
-  ```
-  $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  ```
-
-2. Clone this repository:
-  ```
-  $ git clone git@github.com:johnburbridge/.dotfiles.git
-  ```
-
-3. Run `setup.sh` to install required tools:
-  ```
-  $ cd .dotfiles/ && ./setup.sh
-  ```
-
-Helix
+1. Install zsh (Ubuntu only)
 ```
-$ sudo add-apt-repository ppa:maveonair/helix-editor
-$ sudo apt update
-$ sudo apt install helix
+$ sudo apt update -y && sudo apt install zsh
+$ chsh /usr/bin/zsh
 ```
+
+2. Install Homebrew:
+```
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+3. Clone this repository:
+```
+$ git clone git@github.com:johnburbridge/.dotfiles.git
+```
+
+4. Run `setup.sh` to install required tools:
+```
+$ cd .dotfiles/ && ./setup.sh
+```
+
