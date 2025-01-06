@@ -17,6 +17,8 @@ alias lah='la -h'
 alias k=kubectl
 alias t=task
 
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
 # export STARSHIP_CONFIG=~/.config/starship-gruvbox.toml
 eval "$(starship init zsh)"
 
@@ -35,3 +37,5 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
 
 source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+
