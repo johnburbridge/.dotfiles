@@ -17,15 +17,16 @@ alias lah='la -h'
 alias k=kubectl
 alias t=task
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+export brew_prefix=$(brew --prefix)
+eval "$($brew_prefix/bin/brew shellenv)"
 
 # export STARSHIP_CONFIG=~/.config/starship-gruvbox.toml
 eval "$(starship init zsh)"
 
 
-source $(brew --prefix)/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
-source $(brew --prefix)/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $brew_prefix/share/zsh-fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh
+source $brew_prefix/share/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+source $brew_prefix/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
@@ -36,3 +37,6 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # zstyle :compinstall filename '/home/jburbridge/.zshrc'
 zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
+
