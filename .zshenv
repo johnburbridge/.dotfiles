@@ -1,2 +1,3 @@
-export PATH=$PATH:/usr/local/go/bin
-export EDITOR=hx
+export PATH=$HOME/.local/bin:/usr/local/go/bin:$PATH
+export EDITOR=/opt/homebrew/bin/hx
+export PAGER=/opt/homebrew/bin/moor

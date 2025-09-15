@@ -17,7 +17,7 @@ alias lah='la -h'
 alias k=kubectl
 alias t=task
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # export STARSHIP_CONFIG=~/.config/starship-gruvbox.toml
 eval "$(starship init zsh)"
