@@ -4,32 +4,44 @@
 sudo apt-get install build-essential procps curl file git
 
 # install brew 
-if [ ! -z $(which brew) ];
-  then
-  homebrew_prefix=$(brew --prefix)
-  else
+if [ -z $(which brew) ];
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 # echo $homebrew_prefix
 
-# install apps
-brew install font-jetbrains-mono-nerd-font
-brew install glow
-brew install helix
+# cli environment
 brew install --cask iterm2
+brew install \
+  font-jetbrains-mono-nerd-font \ # needed for zellij's ligatures
+  starship \
+  stow \
+  zellij \
+  zsh-autosuggestions \
+  zsh-fast-syntax-highlighting \
+  zsh-autocomplete
+
+# utilities
+brew install glow \
+  go-task \
+  helix \
+  moor \
+  nvim \
+  wget
+
+# system
+brew install btop \ 
+  htop \
+  tree
+
+# install development tools
 brew install --cask intellij-idea
-brew install moor
-brew install npm
-brew install openjdk@21
-brew install pipx
-brew install starship
-brew install stow
-brew install yarn
-brew install zellij
-brew install zsh-autosuggestions
-brew install zsh-fast-syntax-highlighting
-brew install zsh-autocomplete
+brew install jq \
+  npm \
+  openjdk@21 \
+  pipx \
+  yarn \
+  syq
 
 # synlink all the dotfiles
 stow .
