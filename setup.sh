@@ -17,9 +17,12 @@ fi
 brew install font-jetbrains-mono-nerd-font
 brew install glow
 brew install helix
-brew install pipx
+brew install --cask iterm2
+brew install --cask intellij-idea
 brew install moor
 brew install npm
+brew install openjdk@21
+brew install pipx
 brew install starship
 brew install stow
 brew install yarn
