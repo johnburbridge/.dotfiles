@@ -1,0 +1,142 @@
+version: '3'
+
+tasks:
+  setup:
+    desc: Home environment setup
+    cmds:
+      - task: validate-home-env
+      - task: set-home-configs
+      - task: setup-personal-tools
+
+  validate-home-env:
+    desc: Validate home environment
+    cmd: |
+      echo "Validating home environment..."
+      echo "OS: {{OS}}"
+
+      if [[ "{{OS}}" == "darwin" ]]; then
+        echo "✅ macOS detected"
+      elif [[ "{{OS}}" == "linux" ]]; then
+        echo "✅ Linux detected"
+      else
+        echo "⚠️  Unsupported OS detected"
+      fi
+
+      # Check architecture
+      arch=$(uname -m)
+      echo "Architecture: $arch"
+
+  set-home-configs:
+    desc: Apply home-specific configurations
+    cmd: |
+      echo "Applying home environment configurations..."
+
+      # Create home-specific environment file if it doesn't exist
+      home_env_file="$HOME/.home_env"
+      if [ ! -f "$home_env_file" ]; then
+        echo "Creating home environment configuration..."
+        cat > "$home_env_file" << 'EOF'
+# Home environment configuration
+export DOTFILES_ENV=home
+
+# Personal aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Personal development settings
+export GIT_EDITOR=hx
+export PERSONAL_PROJECTS="$HOME/Projects"
+
+# Java settings for home (OpenJDK)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export JAVA_HOME="/opt/homebrew/opt/openjdk@21"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+fi
+EOF
+        echo "✅ Home environment configuration created at $home_env_file"
+        echo "💡 Consider sourcing this file in your shell configuration"
+      else
+        echo "✅ Home environment configuration already exists"
+      fi
+
+  setup-personal-tools:
+    desc: Set up personal development tools and configurations
+    cmd: |
+      echo "Setting up personal development tools..."
+
+      # Create Projects directory
+      projects_dir="$HOME/Projects"
+      if [ ! -d "$projects_dir" ]; then
+        echo "Creating Projects directory..."
+        mkdir -p "$projects_dir"
+        echo "✅ Created $projects_dir"
+      else
+        echo "✅ Projects directory already exists"
+      fi
+
+      # Set up git configuration for personal use
+      echo "Configuring git for personal use..."
+
+      # Check if user.name is set
+      if ! git config --global user.name &>/dev/null; then
+        echo "⚠️  Git user.name not set. Configure with:"
+        echo "    git config --global user.name \"Your Name\""
+      else
+        echo "✅ Git user.name: $(git config --global user.name)"
+      fi
+
+      # Check if user.email is set
+      if ! git config --global user.email &>/dev/null; then
+        echo "⚠️  Git user.email not set. Configure with:"
+        echo "    git config --global user.email \"your.email@example.com\""
+      else
+        echo "✅ Git user.email: $(git config --global user.email)"
+      fi
+
+  setup-gaming:
+    desc: Set up gaming and entertainment tools (optional)
+    cmd: |
+      echo "Setting up optional gaming and entertainment tools..."
+
+      if [[ "{{OS}}" == "darwin" ]]; then
+        # Optional gaming tools for macOS
+        optional_tools=("steam" "discord" "spotify")
+
+        for tool in "${optional_tools[@]}"; do
+          if ! brew list --cask "$tool" &>/dev/null; then
+            echo "Optional: Install $tool with 'brew install --cask $tool'"
+          else
+            echo "✅ $tool already installed"
+          fi
+        done
+      fi
+
+  check-personal-setup:
+    desc: Check personal environment setup
+    cmd: |
+      echo "Checking personal environment setup..."
+
+      # Check Projects directory
+      if [ -d "$HOME/Projects" ]; then
+        echo "✅ Projects directory exists"
+      else
+        echo "❌ Projects directory missing"
+      fi
+
+      # Check git configuration
+      if git config --global user.name &>/dev/null && git config --global user.email &>/dev/null; then
+        echo "✅ Git configured"
+      else
+        echo "⚠️  Git configuration incomplete"
+      fi
+
+      # Check SSH key
+      if [ -f "$HOME/.ssh/id_rsa" ] || [ -f "$HOME/.ssh/id_ed25519" ]; then
+        echo "✅ SSH key found"
+      else
+        echo "💡 Consider generating an SSH key: ssh-keygen -t ed25519 -C \"your.email@example.com\""
+      fi

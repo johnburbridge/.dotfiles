@@ -1,0 +1,88 @@
+version: '3'
+
+tasks:
+  setup:
+    desc: Work environment setup
+    cmds:
+      - task: validate-work-env
+      - task: set-work-configs
+
+  validate-work-env:
+    desc: Validate work environment requirements
+    cmd: |
+      echo "Validating work environment..."
+      echo "OS: {{OS}}"
+
+      if [[ "{{OS}}" == "darwin" ]]; then
+        echo "✅ macOS detected - work environment supported"
+      else
+        echo "⚠️  Non-macOS detected. Manual Java installation may be required."
+      fi
+
+      # Check if we're in a corporate network (optional)
+      if ping -c 1 -W 1000 google.com &>/dev/null; then
+        echo "✅ Internet connectivity available"
+      else
+        echo "⚠️  Limited internet connectivity - some installations may fail"
+      fi
+
+  set-work-configs:
+    desc: Apply work-specific configurations
+    cmd: |
+      echo "Applying work environment configurations..."
+
+      # Create work-specific environment file if it doesn't exist
+      work_env_file="$HOME/.work_env"
+      if [ ! -f "$work_env_file" ]; then
+        echo "Creating work environment configuration..."
+        cat > "$work_env_file" << 'EOF'
+# Work environment configuration
+export DOTFILES_ENV=work
+
+# Corporate proxy settings (uncomment and configure if needed)
+# export http_proxy=http://proxy.company.com:8080
+# export https_proxy=http://proxy.company.com:8080
+# export no_proxy=localhost,127.0.0.1,.company.com
+
+# Work-specific aliases
+alias work-vpn='echo "Connect to work VPN first"'
+
+# Java settings for work
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Apple JDK path
+    export JAVA_HOME="/Library/Java/JavaVirtualMachines/applejdk-21.jdk/Contents/Home"
+fi
+EOF
+        echo "✅ Work environment configuration created at $work_env_file"
+        echo "💡 Consider sourcing this file in your shell configuration"
+      else
+        echo "✅ Work environment configuration already exists"
+      fi
+
+  check-compliance:
+    desc: Check work environment compliance
+    cmd: |
+      echo "Checking work environment compliance..."
+
+      # Check Java installation
+      if command -v java &> /dev/null; then
+        java_version=$(java -version 2>&1 | head -n1)
+        echo "Java version: $java_version"
+
+        if [[ "$java_version" == *"Azul"* ]] || [[ "$java_version" == *"Apple"* ]]; then
+          echo "✅ Compliant Java distribution detected"
+        else
+          echo "⚠️  Non-corporate Java distribution. Check compliance requirements."
+        fi
+      else
+        echo "❌ Java not installed"
+      fi
+
+      # Check for corporate certificates (macOS)
+      if [[ "{{OS}}" == "darwin" ]]; then
+        if security find-certificate -c "Corporate" &>/dev/null; then
+          echo "✅ Corporate certificates found"
+        else
+          echo "ℹ️  No corporate certificates detected (may not be required)"
+        fi
+      fi
