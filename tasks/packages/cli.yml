@@ -1,0 +1,100 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install CLI environment tools
+    cmds:
+      - task: install-terminal
+      - task: install-shell-tools
+      - task: install-editor
+
+  install-terminal:
+    desc: Install terminal emulator and fonts
+    cmd: |
+      echo "Installing terminal emulator and fonts..."
+      if [[ "{{OS}}" == "darwin" ]]; then
+        if ! brew list --cask iterm2 &>/dev/null; then
+          echo "Installing iTerm2..."
+          brew install --cask iterm2
+        else
+          echo "✅ iTerm2 already installed"
+        fi
+      fi
+
+      if ! brew list font-jetbrains-mono-nerd-font &>/dev/null; then
+        echo "Installing JetBrains Mono Nerd Font..."
+        brew install font-jetbrains-mono-nerd-font
+      else
+        echo "✅ JetBrains Mono Nerd Font already installed"
+      fi
+    status:
+      - '[ "{{OS}}" != "darwin" ] || brew list --cask iterm2'
+      - 'brew list font-jetbrains-mono-nerd-font'
+
+  install-shell-tools:
+    desc: Install shell enhancement tools
+    cmd: |
+      echo "Installing shell enhancement tools..."
+
+      # Starship prompt
+      if ! brew list starship &>/dev/null; then
+        echo "Installing Starship..."
+        brew install starship
+      else
+        echo "✅ Starship already installed"
+      fi
+
+      # Zellij terminal multiplexer
+      if ! brew list zellij &>/dev/null; then
+        echo "Installing Zellij..."
+        brew install zellij
+      else
+        echo "✅ Zellij already installed"
+      fi
+
+      # Zsh plugins
+      echo "Installing Zsh plugins..."
+      brew install zsh-autosuggestions zsh-fast-syntax-highlighting zsh-autocomplete
+    status:
+      - 'brew list starship'
+      - 'brew list zellij'
+      - 'brew list zsh-autosuggestions'
+      - 'brew list zsh-fast-syntax-highlighting'
+      - 'brew list zsh-autocomplete'
+
+  install-editor:
+    desc: Install text editors
+    cmd: |
+      echo "Installing text editors..."
+
+      # Helix editor
+      if ! brew list helix &>/dev/null; then
+        echo "Installing Helix..."
+        brew install helix
+      else
+        echo "✅ Helix already installed"
+      fi
+
+      # Neovim
+      if ! brew list nvim &>/dev/null; then
+        echo "Installing Neovim..."
+        brew install nvim
+      else
+        echo "✅ Neovim already installed"
+      fi
+    status:
+      - 'brew list helix'
+      - 'brew list nvim'
+
+  check:
+    desc: Check if CLI tools are installed
+    cmd: |
+      echo "Checking CLI tools installation..."
+      tools=("starship" "zellij" "hx" "nvim")
+      for tool in "${tools[@]}"; do
+        if command -v "$tool" &> /dev/null; then
+          echo "✅ $tool"
+        else
+          echo "❌ $tool"
+        fi
+      done

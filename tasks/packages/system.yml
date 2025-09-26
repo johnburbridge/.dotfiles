@@ -1,0 +1,69 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install system monitoring and utilities
+    cmds:
+      - task: install-monitoring
+      - task: install-system-tools
+
+  install-monitoring:
+    desc: Install system monitoring tools
+    cmd: |
+      echo "Installing system monitoring tools..."
+
+      # btop - modern system monitor
+      if ! brew list btop &>/dev/null; then
+        echo "Installing btop..."
+        brew install btop
+      else
+        echo "✅ btop already installed"
+      fi
+
+      # htop - interactive process viewer
+      if ! brew list htop &>/dev/null; then
+        echo "Installing htop..."
+        brew install htop
+      else
+        echo "✅ htop already installed"
+      fi
+    status:
+      - 'brew list btop'
+      - 'brew list htop'
+
+  install-system-tools:
+    desc: Install system utility tools
+    cmd: |
+      echo "Installing system utility tools..."
+
+      # tree - directory structure display
+      if ! brew list tree &>/dev/null; then
+        echo "Installing tree..."
+        brew install tree
+      else
+        echo "✅ tree already installed"
+      fi
+
+      # GNU stow for dotfiles management
+      if ! brew list stow &>/dev/null; then
+        echo "Installing GNU stow..."
+        brew install stow
+      else
+        echo "✅ GNU stow already installed"
+      fi
+    status:
+      - 'brew list tree'
+      - 'brew list stow'
+
+  check:
+    desc: Check system tools installation
+    cmd: |
+      echo "Checking system tools installation..."
+      tools=("btop" "htop" "tree" "stow")
+      for tool in "${tools[@]}"; do
+        if command -v "$tool" &> /dev/null; then
+          echo "✅ $tool"
+        else
+          echo "❌ $tool"
+        fi
+      done

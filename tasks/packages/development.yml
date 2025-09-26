@@ -1,0 +1,180 @@
+version: '3'
+
+vars:
+  DOTFILES_ENV: '{{.DOTFILES_ENV | default "home"}}'
+
+tasks:
+  install:
+    desc: Install development tools
+    cmds:
+      - task: install-ide
+      - task: install-vcs
+      - task: install-languages
+      - task: install-tools
+
+  install-ide:
+    desc: Install IDE and development environments
+    cmd: |
+      echo "Installing development IDE..."
+      if [[ "{{OS}}" == "darwin" ]]; then
+        if ! brew list --cask intellij-idea &>/dev/null; then
+          echo "Installing IntelliJ IDEA..."
+          brew install --cask intellij-idea
+        else
+          echo "✅ IntelliJ IDEA already installed"
+        fi
+      fi
+    status:
+      - '[ "{{OS}}" != "darwin" ] || brew list --cask intellij-idea'
+
+  install-vcs:
+    desc: Install version control systems and tools
+    cmd: |
+      echo "Installing version control tools..."
+
+      if ! brew list gh &>/dev/null; then
+        echo "Installing GitHub CLI..."
+        brew install gh
+      else
+        echo "✅ GitHub CLI already installed"
+      fi
+    status:
+      - 'brew list gh'
+
+  install-languages:
+    desc: Install programming languages and runtimes
+    cmds:
+      - task: install-node
+      - task: install-python
+      - task: install-java
+
+  install-node:
+    desc: Install Node.js and package managers
+    cmd: |
+      echo "Installing Node.js and package managers..."
+
+      if ! brew list node &>/dev/null; then
+        echo "Installing Node.js..."
+        brew install node
+      else
+        echo "✅ Node.js already installed"
+      fi
+
+      if ! brew list yarn &>/dev/null; then
+        echo "Installing Yarn..."
+        brew install yarn
+      else
+        echo "✅ Yarn already installed"
+      fi
+    status:
+      - 'brew list node'
+      - 'brew list yarn'
+
+  install-python:
+    desc: Install Python tools
+    cmd: |
+      echo "Installing Python tools..."
+
+      if ! brew list pipx &>/dev/null; then
+        echo "Installing pipx..."
+        brew install pipx
+      else
+        echo "✅ pipx already installed"
+      fi
+
+      # Install Python development packages if requirements file exists
+      if [ -f ".config/python-dev-requirements.txt" ]; then
+        echo "Installing Python development packages..."
+        pipx install -r .config/python-dev-requirements.txt 2>/dev/null || true
+      fi
+    status:
+      - 'brew list pipx'
+
+  install-java:
+    desc: Install Java Development Kit (environment-specific)
+    cmd: |
+      echo "Installing Java Development Kit..."
+      echo "Environment: {{.DOTFILES_ENV}}"
+
+      if [[ "{{.DOTFILES_ENV}}" == "work" ]]; then
+        # Work environment - use Apple JDK for licensing compliance
+        if [[ "{{OS}}" == "darwin" ]]; then
+          if ! brew list --cask apple/applejdk/applejdk-21 &>/dev/null; then
+            echo "Installing Apple JDK 21 (work environment)..."
+            brew tap apple/applejdk
+            brew install --cask apple/applejdk/applejdk-21
+          else
+            echo "✅ Apple JDK 21 already installed"
+          fi
+        else
+          echo "⚠️  Work environment on Linux - please install JDK manually"
+        fi
+      else
+        # Home environment - use OpenJDK
+        if ! brew list openjdk@21 &>/dev/null; then
+          echo "Installing OpenJDK 21 (home environment)..."
+          brew install openjdk@21
+
+          # Create symlink for system Java wrapper
+          if [[ "{{OS}}" == "darwin" ]]; then
+            sudo ln -sfn /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk 2>/dev/null || true
+          fi
+        else
+          echo "✅ OpenJDK 21 already installed"
+        fi
+      fi
+    status:
+      - |
+        if [[ "{{.DOTFILES_ENV}}" == "work" && "{{OS}}" == "darwin" ]]; then
+          brew list --cask apple/applejdk/applejdk-21
+        elif [[ "{{.DOTFILES_ENV}}" == "home" ]]; then
+          brew list openjdk@21
+        else
+          true  # Skip check for work Linux
+        fi
+
+  install-tools:
+    desc: Install development utilities
+    cmd: |
+      echo "Installing development utilities..."
+
+      # JSON processor
+      if ! brew list jq &>/dev/null; then
+        echo "Installing jq..."
+        brew install jq
+      else
+        echo "✅ jq already installed"
+      fi
+
+      # YAML processor (assuming syq was a typo for yq)
+      if ! brew list yq &>/dev/null; then
+        echo "Installing yq..."
+        brew install yq
+      else
+        echo "✅ yq already installed"
+      fi
+    status:
+      - 'brew list jq'
+      - 'brew list yq'
+
+  check:
+    desc: Check development tools installation
+    cmd: |
+      echo "Checking development tools installation..."
+      echo "Environment: {{.DOTFILES_ENV}}"
+
+      tools=("gh" "node" "npm" "yarn" "pipx" "jq" "yq")
+      for tool in "${tools[@]}"; do
+        if command -v "$tool" &> /dev/null; then
+          echo "✅ $tool"
+        else
+          echo "❌ $tool"
+        fi
+      done
+
+      # Check Java installation
+      if command -v java &> /dev/null; then
+        echo "✅ java ($(java -version 2>&1 | head -n1))"
+      else
+        echo "❌ java"
+      fi
