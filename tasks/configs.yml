@@ -1,0 +1,116 @@
+version: '3'
+
+tasks:
+  link:
+    desc: Link dotfiles using GNU stow
+    cmds:
+      - task: check-stow
+      - task: backup-existing
+      - task: stow-configs
+
+  check-stow:
+    desc: Verify GNU stow is available
+    cmd: |
+      if ! command -v stow &> /dev/null; then
+        echo "❌ GNU stow not found. Please install it first."
+        exit 1
+      fi
+      echo "✅ GNU stow is available"
+
+  backup-existing:
+    desc: Backup existing dotfiles that would conflict
+    cmd: |
+      echo "Checking for conflicting dotfiles..."
+
+      # Files that stow will manage
+      dotfiles=(".zshrc" ".zshenv" ".gitconfig")
+      backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+      backup_needed=false
+
+      for file in "${dotfiles[@]}"; do
+        if [ -f "$HOME/$file" ] && [ ! -L "$HOME/$file" ]; then
+          if [ "$backup_needed" = false ]; then
+            echo "Creating backup directory: $backup_dir"
+            mkdir -p "$backup_dir"
+            backup_needed=true
+          fi
+          echo "Backing up existing $file"
+          mv "$HOME/$file" "$backup_dir/"
+        fi
+      done
+
+      if [ "$backup_needed" = true ]; then
+        echo "✅ Existing dotfiles backed up to $backup_dir"
+      else
+        echo "✅ No conflicting dotfiles found"
+      fi
+
+  stow-configs:
+    desc: Use stow to create symlinks for dotfiles
+    cmd: |
+      echo "Creating symlinks for dotfiles..."
+
+      # Change to dotfiles directory
+      cd "$(dirname "$(realpath "$0")")"
+
+      # Use stow to create symlinks
+      # The . means stow the current directory to the parent directory (home)
+      if stow --verbose=2 --target="$HOME" --restow .; then
+        echo "✅ Dotfiles successfully linked with stow"
+      else
+        echo "❌ Failed to link dotfiles with stow"
+        exit 1
+      fi
+
+  unlink:
+    desc: Remove stow-managed symlinks
+    cmd: |
+      echo "Removing stow-managed symlinks..."
+      cd "$(dirname "$(realpath "$0")")"
+      stow --verbose=2 --target="$HOME" --delete .
+      echo "✅ Dotfiles unlinked"
+
+  check:
+    desc: Check which dotfiles are currently linked
+    cmd: |
+      echo "Checking dotfile symlinks..."
+
+      dotfiles=(".zshrc" ".zshenv" ".gitconfig")
+      for file in "${dotfiles[@]}"; do
+        if [ -L "$HOME/$file" ]; then
+          target=$(readlink "$HOME/$file")
+          echo "✅ $file -> $target"
+        elif [ -f "$HOME/$file" ]; then
+          echo "⚠️  $file exists but is not a symlink"
+        else
+          echo "❌ $file not found"
+        fi
+      done
+
+      # Check .config directory
+      if [ -L "$HOME/.config" ]; then
+        target=$(readlink "$HOME/.config")
+        echo "✅ .config -> $target"
+      elif [ -d "$HOME/.config" ]; then
+        echo "⚠️  .config exists but is not a symlink (this is normal)"
+        # Check individual config files/directories
+        configs=("helix" "htop" "iterm2" "nvim" "zellij" "starship.toml" "starship-gruvbox.toml" "python-dev-requirements.txt")
+        for config in "${configs[@]}"; do
+          if [ -L "$HOME/.config/$config" ]; then
+            target=$(readlink "$HOME/.config/$config")
+            echo "  ✅ .config/$config -> $target"
+          elif [ -e "$HOME/.config/$config" ]; then
+            echo "  ⚠️  .config/$config exists but is not a symlink"
+          fi
+        done
+      else
+        echo "❌ .config directory not found"
+      fi
+
+  restow:
+    desc: Re-stow dotfiles (useful after adding new files)
+    cmd: |
+      echo "Re-stowing dotfiles..."
+      cd "$(dirname "$(realpath "$0")")"
+      stow --verbose=2 --target="$HOME" --restow .
+      echo "✅ Dotfiles re-stowed"
