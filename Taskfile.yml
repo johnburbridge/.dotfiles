@@ -1,0 +1,68 @@
+version: '3'
+
+vars:
+  DOTFILES_ENV: '{{.DOTFILES_ENV | default "home"}}'
+  OS: '{{OS}}'
+
+includes:
+  homebrew: ./tasks/homebrew.yml
+  cli: ./tasks/packages/cli.yml
+  dev: ./tasks/packages/development.yml
+  system: ./tasks/packages/system.yml
+  utils: ./tasks/packages/utils.yml
+  configs: ./tasks/configs.yml
+  work: ./tasks/environments/work.yml
+  home: ./tasks/environments/home.yml
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmd: task --list
+
+  setup:
+    desc: Complete dotfiles setup
+    deps:
+      - homebrew:install
+      - cli:install
+      - dev:install
+      - system:install
+      - utils:install
+      - configs:link
+
+  install:cli:
+    desc: Install CLI tools only
+    deps:
+      - homebrew:install
+      - cli:install
+      - configs:link
+
+  install:dev:
+    desc: Install development tools only
+    deps:
+      - homebrew:install
+      - dev:install
+
+  install:system:
+    desc: Install system utilities only
+    deps:
+      - homebrew:install
+      - system:install
+
+  install:utils:
+    desc: Install general utilities only
+    deps:
+      - homebrew:install
+      - utils:install
+
+  check-env:
+    desc: Check environment variables and OS
+    cmd: |
+      echo "Environment: {{.DOTFILES_ENV}}"
+      echo "OS: {{.OS}}"
+      echo "Homebrew prefix: {{if eq .OS "darwin"}}/opt/homebrew{{else}}/home/linuxbrew/.linuxbrew{{end}}"
+
+  clean:
+    desc: Clean up temporary files and caches
+    cmd: |
+      echo "Cleaning up..."
+      rm -rf /tmp/dotfiles-*

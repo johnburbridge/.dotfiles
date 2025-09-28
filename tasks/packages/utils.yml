@@ -1,0 +1,76 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install general utilities
+    cmds:
+      - task: install-document-tools
+      - task: install-network-tools
+      - task: install-task-runner
+
+  install-document-tools:
+    desc: Install document viewing and processing tools
+    cmd: |
+      echo "Installing document tools..."
+
+      # glow - markdown viewer
+      if ! brew list glow &>/dev/null; then
+        echo "Installing glow..."
+        brew install glow
+      else
+        echo "✅ glow already installed"
+      fi
+
+      # moor - pager/document viewer
+      if ! brew list moor &>/dev/null; then
+        echo "Installing moor..."
+        brew install moor
+      else
+        echo "✅ moor already installed"
+      fi
+    status:
+      - 'brew list glow'
+      - 'brew list moor'
+
+  install-network-tools:
+    desc: Install network and download tools
+    cmd: |
+      echo "Installing network tools..."
+
+      # wget - file downloader
+      if ! brew list wget &>/dev/null; then
+        echo "Installing wget..."
+        brew install wget
+      else
+        echo "✅ wget already installed"
+      fi
+    status:
+      - 'brew list wget'
+
+  install-task-runner:
+    desc: Install task runner (go-task)
+    cmd: |
+      echo "Installing task runner..."
+
+      # go-task - task runner
+      if ! brew list go-task &>/dev/null; then
+        echo "Installing go-task..."
+        brew install go-task
+      else
+        echo "✅ go-task already installed"
+      fi
+    status:
+      - 'brew list go-task'
+
+  check:
+    desc: Check utilities installation
+    cmd: |
+      echo "Checking utilities installation..."
+      tools=("glow" "moor" "wget" "task")
+      for tool in "${tools[@]}"; do
+        if command -v "$tool" &> /dev/null; then
+          echo "✅ $tool"
+        else
+          echo "❌ $tool"
+        fi
+      done

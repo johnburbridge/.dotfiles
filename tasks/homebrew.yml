@@ -1,0 +1,78 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install Homebrew if not present
+    cmds:
+      - task: check-brew
+      - task: install-brew
+      - task: install-linux-prereqs
+      - task: setup-path
+
+  check-brew:
+    desc: Check if Homebrew is installed
+    cmd: |
+      if command -v brew &> /dev/null; then
+        echo "✅ Homebrew already installed"
+      else
+        echo "❌ Homebrew not found, will install"
+      fi
+    silent: true
+
+  install-brew:
+    desc: Install Homebrew if not present
+    cmd: |
+      if ! command -v brew &> /dev/null; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      else
+        echo "Homebrew already installed, skipping"
+      fi
+    status:
+      - command -v brew
+
+  install-linux-prereqs:
+    desc: Install Linux prerequisites for Homebrew
+    platforms: [linux]
+    cmd: |
+      echo "Installing Linux prerequisites for Homebrew..."
+      if command -v apt-get &> /dev/null; then
+        sudo apt-get update -y
+        sudo apt-get install -y build-essential procps curl file git
+      elif command -v dnf &> /dev/null; then
+        sudo dnf groupinstall -y 'Development Tools'
+        sudo dnf install -y procps-ng curl file git
+      elif command -v pacman &> /dev/null; then
+        sudo pacman -S --needed base-devel procps-ng curl file git
+      else
+        echo "⚠️  Unsupported Linux distribution. Please install build tools manually."
+      fi
+    status:
+      - '[ "{{OS}}" != "linux" ] || command -v gcc'
+
+  setup-path:
+    desc: Add Homebrew to PATH for current session
+    cmd: |
+      if [[ "{{OS}}" == "linux" ]]; then
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+      elif [[ "{{OS}}" == "darwin" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      fi
+      echo "Homebrew PATH configured"
+
+  update:
+    desc: Update Homebrew and upgrade packages
+    cmd: |
+      echo "Updating Homebrew..."
+      brew update
+      echo "Upgrading packages..."
+      brew upgrade
+    deps: [install]
+
+  cleanup:
+    desc: Clean up Homebrew caches
+    cmd: |
+      echo "Cleaning up Homebrew caches..."
+      brew cleanup
+      brew autoremove
+    deps: [install]
