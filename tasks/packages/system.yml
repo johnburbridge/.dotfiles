@@ -51,9 +51,18 @@ tasks:
       else
         echo "✅ GNU stow already installed"
       fi
+
+      # watch - loops over things
+      if ! brew list watch &>/dev/null; then
+        echo "Installing watch..."
+        brew install watch
+      else
+        echo "✅ GNU stow already installed"
+      fi
     status:
       - 'brew list tree'
       - 'brew list stow'
+      - 'brew list watch'
 
   check:
     desc: Check system tools installation
