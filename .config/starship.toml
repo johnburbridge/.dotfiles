@@ -1,15 +1,21 @@
 # This is the default format
 #format = '$all'
 format = """
-[╭─](#464646) $os$hostname$all\
+[╭─](#464646) $os$hostname$all$right_format\
 [╰─](#464646)$character\
 """
+
+right_format = '$env_var'
 
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
 # Inserts a blank line between shell prompts
 add_newline = true
+
+[env_var.LAST_COMMAND_TIMESTAMP]
+format = '[\[$env_value\]]($style) '
+style = "bright-blue"
 
 
 # Disable the package module, hiding it from the prompt completely

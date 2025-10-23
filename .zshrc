@@ -36,3 +36,8 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # zstyle :compinstall filename '/home/jburbridge/.zshrc'
 zstyle ':autocomplete:menu-search:*' insert-unambiguous yes
+
+# Capture timestamp when command completes
+precmd() {
+  export LAST_COMMAND_TIMESTAMP=$(date '+%H:%M:%S')
+}
