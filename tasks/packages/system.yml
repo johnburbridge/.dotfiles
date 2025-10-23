@@ -51,6 +51,13 @@ tasks:
       else
         echo "✅ GNU stow already installed"
       fi
+
+      # watch - loops over things
+      if ! brew list watch &>/dev/null; then
+        echo "Installing watch..."
+        brew install watch
+      else
+        echo "✅ GNU stow already installed"
       
        # Alternative to grep
       if ! brew list ripgrep &>/dev/null; then
@@ -62,6 +69,7 @@ tasks:
     status:
       - 'brew list tree'
       - 'brew list stow'
+      - 'brew list watch'
       - 'brew list ripgrep'
 
   check:
