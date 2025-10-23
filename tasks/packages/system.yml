@@ -58,11 +58,19 @@ tasks:
         brew install watch
       else
         echo "✅ GNU stow already installed"
+      
+       # Alternative to grep
+      if ! brew list ripgrep &>/dev/null; then
+        echo "Installing ripgrep..."
+        brew install ripgrep
+      else
+        echo "✅ ripgrep already installed"
       fi
     status:
       - 'brew list tree'
       - 'brew list stow'
       - 'brew list watch'
+      - 'brew list ripgrep'
 
   check:
     desc: Check system tools installation
