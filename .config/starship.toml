@@ -1,11 +1,9 @@
 # This is the default format
 #format = '$all'
 format = """
-[╭─](#464646) $os$hostname$all$right_format\
+[╭─](#464646) $os$hostname$directory$git_branch$git_status$env_var
 [╰─](#464646)$character\
 """
-
-right_format = '$env_var'
 
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
