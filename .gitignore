@@ -9,3 +9,7 @@
 *.swp
 *.swo
 *~
+
+# Homebrew audit artifacts (generated)
+homebrew/Brewfile.actual
+homebrew/Brewfile.expected

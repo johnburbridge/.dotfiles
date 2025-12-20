@@ -35,28 +35,27 @@ tasks:
       home_env_file="$HOME/.home_env"
       if [ ! -f "$home_env_file" ]; then
         echo "Creating home environment configuration..."
-        cat > "$home_env_file" << 'EOF'
-# Home environment configuration
-export DOTFILES_ENV=home
-
-# Personal aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias ..='cd ..'
-alias ...='cd ../..'
-
-# Personal development settings
-export GIT_EDITOR=hx
-export PERSONAL_PROJECTS="$HOME/Projects"
-
-# Java settings for home (OpenJDK)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    export JAVA_HOME="/opt/homebrew/opt/openjdk@21"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
-fi
-EOF
+        {
+          echo "# Home environment configuration"
+          echo "export DOTFILES_ENV=home"
+          echo ""
+          echo "# Personal aliases"
+          echo "alias ll='ls -alF'"
+          echo "alias la='ls -A'"
+          echo "alias l='ls -CF'"
+          echo "alias ..='cd ..'"
+          echo "alias ...='cd ../..'"
+          echo "# Personal development settings"
+          echo "export GIT_EDITOR=hx"
+          echo "export PERSONAL_PROJECTS=\"\$HOME/Projects\""
+          echo ""
+          echo "# Java settings for home (OpenJDK)"
+          echo "if [[ \"\$OSTYPE\" == \"darwin\"* ]]; then"
+          echo "    export JAVA_HOME=\"/opt/homebrew/opt/openjdk@21\""
+          echo "elif [[ \"\$OSTYPE\" == \"linux-gnu\"* ]]; then"
+          echo "    export JAVA_HOME=\"/usr/lib/jvm/java-21-openjdk\""
+          echo "fi"
+        } > "$home_env_file"
         echo "✅ Home environment configuration created at $home_env_file"
         echo "💡 Consider sourcing this file in your shell configuration"
       else

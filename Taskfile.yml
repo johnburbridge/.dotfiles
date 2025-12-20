@@ -66,3 +66,8 @@ tasks:
     cmd: |
       echo "Cleaning up..."
       rm -rf /tmp/dotfiles-*
+
+  audit:
+    desc: Audit Homebrew packages
+    cmds:
+      - task: homebrew:audit
