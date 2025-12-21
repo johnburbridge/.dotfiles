@@ -35,24 +35,24 @@ tasks:
       work_env_file="$HOME/.work_env"
       if [ ! -f "$work_env_file" ]; then
         echo "Creating work environment configuration..."
-        cat > "$work_env_file" << 'EOF'
-# Work environment configuration
-export DOTFILES_ENV=work
-
-# Corporate proxy settings (uncomment and configure if needed)
-# export http_proxy=http://proxy.company.com:8080
-# export https_proxy=http://proxy.company.com:8080
-# export no_proxy=localhost,127.0.0.1,.company.com
-
-# Work-specific aliases
-alias work-vpn='echo "Connect to work VPN first"'
-
-# Java settings for work
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Apple JDK path
-    export JAVA_HOME="/Library/Java/JavaVirtualMachines/applejdk-21.jdk/Contents/Home"
-fi
-EOF
+        {
+          echo "# Work environment configuration"
+          echo "export DOTFILES_ENV=work"
+          echo ""
+          echo "# Corporate proxy settings (uncomment and configure if needed)"
+          echo "# export http_proxy=http://proxy.company.com:8080"
+          echo "# export https_proxy=http://proxy.company.com:8080"
+          echo "# export no_proxy=localhost,127.0.0.1,.company.com"
+          echo ""
+          echo "# Work-specific aliases"
+          echo "alias work-vpn='echo \"Connect to work VPN first\"'"
+          echo ""
+          echo "# Java settings for work"
+          echo "if [[ \"\$OSTYPE\" == \"darwin\"* ]]; then"
+          echo "    # Apple JDK path"
+          echo "    export JAVA_HOME=\"/Library/Java/JavaVirtualMachines/applejdk-21.jdk/Contents/Home\""
+          echo "fi"
+        } > "$work_env_file"
         echo "✅ Work environment configuration created at $work_env_file"
         echo "💡 Consider sourcing this file in your shell configuration"
       else

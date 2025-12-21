@@ -1,5 +1,54 @@
 version: '3'
 
+vars:
+  DOTFILES_ENV: '{{.DOTFILES_ENV | default "home"}}'
+  HOMEBREW_DIR: '{{.ROOT_DIR}}/homebrew'
+
+  MANAGED_FORMULAE_BASE: |
+    btop
+    gh
+    glow
+    go-task
+    helix
+    htop
+    jq
+    moor
+    node
+    nvim
+    pipx
+    ripgrep
+    starship
+    stow
+    tree
+    watch
+    wget
+    yarn
+    yq
+    zellij
+    zsh-autocomplete
+    zsh-autosuggestions
+    zsh-fast-syntax-highlighting
+
+  MANAGED_FORMULAE_HOME: |
+    openjdk@21
+
+  MANAGED_FORMULAE_WORK: ""
+
+  MANAGED_CASKS_BASE: |
+    font-jetbrains-mono-nerd-font
+    intellij-idea
+    iterm2
+
+  MANAGED_CASKS_WORK: |
+    apple/applejdk/applejdk-21
+
+  MANAGED_CASKS_HOME: ""
+
+  MANAGED_TAPS_BASE: ""
+  MANAGED_TAPS_WORK: |
+    apple/applejdk
+  MANAGED_TAPS_HOME: ""
+
 tasks:
   install:
     desc: Install Homebrew if not present
@@ -76,3 +125,226 @@ tasks:
       brew cleanup
       brew autoremove
     deps: [install]
+
+  dump:
+    desc: Dump current Homebrew state to Brewfile.actual
+    cmd: |
+      echo "Dumping current Homebrew state..."
+      mkdir -p "{{.HOMEBREW_DIR}}"
+      brew bundle dump --force --file="{{.HOMEBREW_DIR}}/Brewfile.actual"
+      echo "Dumped to {{.HOMEBREW_DIR}}/Brewfile.actual"
+      echo "  Formulae: $(grep -c '^brew ' "{{.HOMEBREW_DIR}}/Brewfile.actual" || echo 0)"
+      echo "  Casks: $(grep -c '^cask ' "{{.HOMEBREW_DIR}}/Brewfile.actual" || echo 0)"
+      echo "  Taps: $(grep -c '^tap ' "{{.HOMEBREW_DIR}}/Brewfile.actual" || echo 0)"
+    deps: [install]
+
+  generate:
+    desc: Generate Brewfile.expected from managed package list
+    cmd: |
+      echo "Generating expected Brewfile..."
+      mkdir -p "{{.HOMEBREW_DIR}}"
+
+      # Start with empty file
+      > "{{.HOMEBREW_DIR}}/Brewfile.expected"
+
+      # Add taps
+      {
+        echo "{{.MANAGED_TAPS_BASE}}"
+        if [[ "{{.DOTFILES_ENV}}" == "work" ]]; then
+          echo "{{.MANAGED_TAPS_WORK}}"
+        else
+          echo "{{.MANAGED_TAPS_HOME}}"
+        fi
+      } | grep -v '^$' | sort -u | while read -r tap; do
+        [ -n "$tap" ] && echo "tap \"$tap\"" >> "{{.HOMEBREW_DIR}}/Brewfile.expected"
+      done
+
+      # Add formulae
+      {
+        echo "{{.MANAGED_FORMULAE_BASE}}"
+        if [[ "{{.DOTFILES_ENV}}" == "work" ]]; then
+          echo "{{.MANAGED_FORMULAE_WORK}}"
+        else
+          echo "{{.MANAGED_FORMULAE_HOME}}"
+        fi
+      } | grep -v '^$' | sort -u | while read -r formula; do
+        [ -n "$formula" ] && echo "brew \"$formula\"" >> "{{.HOMEBREW_DIR}}/Brewfile.expected"
+      done
+
+      # Add casks (darwin only)
+      if [[ "{{OS}}" == "darwin" ]]; then
+        {
+          echo "{{.MANAGED_CASKS_BASE}}"
+          if [[ "{{.DOTFILES_ENV}}" == "work" ]]; then
+            echo "{{.MANAGED_CASKS_WORK}}"
+          else
+            echo "{{.MANAGED_CASKS_HOME}}"
+          fi
+        } | grep -v '^$' | sort -u | while read -r cask; do
+          [ -n "$cask" ] && echo "cask \"$cask\"" >> "{{.HOMEBREW_DIR}}/Brewfile.expected"
+        done
+      fi
+
+      echo "Generated {{.HOMEBREW_DIR}}/Brewfile.expected"
+      echo "  Formulae: $(grep -c '^brew ' "{{.HOMEBREW_DIR}}/Brewfile.expected" || echo 0)"
+      echo "  Casks: $(grep -c '^cask ' "{{.HOMEBREW_DIR}}/Brewfile.expected" || echo 0)"
+      echo "  Taps: $(grep -c '^tap ' "{{.HOMEBREW_DIR}}/Brewfile.expected" || echo 0)"
+
+  compare:
+    desc: Compare actual vs expected Homebrew packages
+    deps: [dump, generate]
+    cmd: |
+      echo ""
+      echo "========================================"
+      echo "  HOMEBREW AUDIT REPORT"
+      echo "  Environment: {{.DOTFILES_ENV}}"
+      echo "  Platform: {{OS}}"
+      echo "========================================"
+      echo ""
+
+      actual="{{.HOMEBREW_DIR}}/Brewfile.actual"
+      expected="{{.HOMEBREW_DIR}}/Brewfile.expected"
+
+      # Extract package names from Brewfiles
+      actual_formulae=$(grep '^brew ' "$actual" | sed 's/brew "\([^"]*\)".*/\1/' | sort)
+      expected_formulae=$(grep '^brew ' "$expected" | sed 's/brew "\([^"]*\)".*/\1/' | sort)
+
+      actual_casks=$(grep '^cask ' "$actual" | sed 's/cask "\([^"]*\)".*/\1/' | sort)
+      expected_casks=$(grep '^cask ' "$expected" | sed 's/cask "\([^"]*\)".*/\1/' | sort)
+
+      actual_taps=$(grep '^tap ' "$actual" | sed 's/tap "\([^"]*\)".*/\1/' | sort)
+      expected_taps=$(grep '^tap ' "$expected" | sed 's/tap "\([^"]*\)".*/\1/' | sort)
+
+      # Find unmanaged packages
+      unmanaged_formulae=$(comm -23 <(echo "$actual_formulae") <(echo "$expected_formulae"))
+      unmanaged_casks=$(comm -23 <(echo "$actual_casks") <(echo "$expected_casks"))
+      unmanaged_taps=$(comm -23 <(echo "$actual_taps") <(echo "$expected_taps"))
+
+      # Find missing packages (expected but not installed)
+      missing_formulae=$(comm -13 <(echo "$actual_formulae") <(echo "$expected_formulae"))
+      missing_casks=$(comm -13 <(echo "$actual_casks") <(echo "$expected_casks"))
+      missing_taps=$(comm -13 <(echo "$actual_taps") <(echo "$expected_taps"))
+
+      # Report unmanaged
+      echo "UNMANAGED PACKAGES (installed but not in dotfiles):"
+      echo "----------------------------------------------------"
+
+      if [ -n "$unmanaged_formulae" ]; then
+        count=$(echo "$unmanaged_formulae" | wc -l | tr -d ' ')
+        echo ""
+        echo "Formulae ($count):"
+        echo "$unmanaged_formulae" | sed 's/^/  - /'
+      fi
+
+      if [ -n "$unmanaged_casks" ]; then
+        count=$(echo "$unmanaged_casks" | wc -l | tr -d ' ')
+        echo ""
+        echo "Casks ($count):"
+        echo "$unmanaged_casks" | sed 's/^/  - /'
+      fi
+
+      if [ -n "$unmanaged_taps" ]; then
+        count=$(echo "$unmanaged_taps" | wc -l | tr -d ' ')
+        echo ""
+        echo "Taps ($count):"
+        echo "$unmanaged_taps" | sed 's/^/  - /'
+      fi
+
+      if [ -z "$unmanaged_formulae" ] && [ -z "$unmanaged_casks" ] && [ -z "$unmanaged_taps" ]; then
+        echo "  None - all packages are managed!"
+      fi
+
+      # Report missing
+      echo ""
+      echo "MISSING PACKAGES (in dotfiles but not installed):"
+      echo "----------------------------------------------------"
+
+      if [ -n "$missing_formulae" ]; then
+        count=$(echo "$missing_formulae" | wc -l | tr -d ' ')
+        echo ""
+        echo "Formulae ($count):"
+        echo "$missing_formulae" | sed 's/^/  - /'
+      fi
+
+      if [ -n "$missing_casks" ]; then
+        count=$(echo "$missing_casks" | wc -l | tr -d ' ')
+        echo ""
+        echo "Casks ($count):"
+        echo "$missing_casks" | sed 's/^/  - /'
+      fi
+
+      if [ -n "$missing_taps" ]; then
+        count=$(echo "$missing_taps" | wc -l | tr -d ' ')
+        echo ""
+        echo "Taps ($count):"
+        echo "$missing_taps" | sed 's/^/  - /'
+      fi
+
+      if [ -z "$missing_formulae" ] && [ -z "$missing_casks" ] && [ -z "$missing_taps" ]; then
+        echo "  None - all expected packages are installed!"
+      fi
+
+      echo ""
+      echo "========================================"
+
+  audit:
+    desc: Run full Homebrew audit (dump, generate, compare)
+    cmds:
+      - task: compare
+
+  audit-formulae:
+    desc: Show only unmanaged formulae
+    deps: [dump, generate]
+    cmd: |
+      actual="{{.HOMEBREW_DIR}}/Brewfile.actual"
+      expected="{{.HOMEBREW_DIR}}/Brewfile.expected"
+
+      actual_formulae=$(grep '^brew ' "$actual" | sed 's/brew "\([^"]*\)".*/\1/' | sort)
+      expected_formulae=$(grep '^brew ' "$expected" | sed 's/brew "\([^"]*\)".*/\1/' | sort)
+
+      unmanaged=$(comm -23 <(echo "$actual_formulae") <(echo "$expected_formulae"))
+
+      if [ -n "$unmanaged" ]; then
+        echo "Unmanaged formulae:"
+        echo "$unmanaged" | sed 's/^/  - /'
+      else
+        echo "All formulae are managed."
+      fi
+
+  audit-casks:
+    desc: Show only unmanaged casks
+    deps: [dump, generate]
+    cmd: |
+      actual="{{.HOMEBREW_DIR}}/Brewfile.actual"
+      expected="{{.HOMEBREW_DIR}}/Brewfile.expected"
+
+      actual_casks=$(grep '^cask ' "$actual" | sed 's/cask "\([^"]*\)".*/\1/' | sort)
+      expected_casks=$(grep '^cask ' "$expected" | sed 's/cask "\([^"]*\)".*/\1/' | sort)
+
+      unmanaged=$(comm -23 <(echo "$actual_casks") <(echo "$expected_casks"))
+
+      if [ -n "$unmanaged" ]; then
+        echo "Unmanaged casks:"
+        echo "$unmanaged" | sed 's/^/  - /'
+      else
+        echo "All casks are managed."
+      fi
+
+  audit-taps:
+    desc: Show only unmanaged taps
+    deps: [dump, generate]
+    cmd: |
+      actual="{{.HOMEBREW_DIR}}/Brewfile.actual"
+      expected="{{.HOMEBREW_DIR}}/Brewfile.expected"
+
+      actual_taps=$(grep '^tap ' "$actual" | sed 's/tap "\([^"]*\)".*/\1/' | sort)
+      expected_taps=$(grep '^tap ' "$expected" | sed 's/tap "\([^"]*\)".*/\1/' | sort)
+
+      unmanaged=$(comm -23 <(echo "$actual_taps") <(echo "$expected_taps"))
+
+      if [ -n "$unmanaged" ]; then
+        echo "Unmanaged taps:"
+        echo "$unmanaged" | sed 's/^/  - /'
+      else
+        echo "All taps are managed."
+      fi
