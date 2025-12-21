@@ -107,10 +107,123 @@ task --list
 
 Common tasks:
 - `task setup` - Complete environment setup
+- `task audit` - Audit Homebrew packages (see Homebrew Audit section)
 - `task homebrew:install` - Install Homebrew
 - `task configs:link` - Link dotfiles with stow
 - `task configs:check` - Check linked configurations
 - `task <category>:check` - Check installation status
+
+## Homebrew Audit
+
+The audit system helps you track which Homebrew packages are installed on your system but not managed in your dotfiles configuration. This is useful for:
+- **Discovering packages** you've installed manually that should be in version control
+- **Identifying orphaned packages** you may have forgotten about
+- **Maintaining consistency** across machines by ensuring all packages are documented
+
+### Running an Audit
+
+```bash
+# Full audit report (formulae, casks, and taps)
+task audit
+# or
+task homebrew:audit
+
+# Focused audits for specific package types
+task homebrew:audit-formulae    # Only show unmanaged formulae
+task homebrew:audit-casks       # Only show unmanaged casks
+task homebrew:audit-taps        # Only show unmanaged taps
+```
+
+### Understanding the Output
+
+The audit report shows two categories:
+
+**UNMANAGED PACKAGES** - Installed via Homebrew but not in your dotfiles:
+```
+Formulae (34):
+  - terraform
+  - kubectl
+  - helm
+  ...
+
+Casks (9):
+  - docker
+  - slack
+  ...
+
+Taps (1):
+  - hashicorp/tap
+```
+
+**MISSING PACKAGES** - In your dotfiles config but not currently installed:
+```
+Formulae (4):
+  - nvim
+  - yarn
+  ...
+```
+
+### Adding Packages to Management
+
+When you find packages you want to manage, add them to the centralized lists in `tasks/homebrew.yml`:
+
+1. **Edit the vars section** in `tasks/homebrew.yml`:
+   ```yaml
+   vars:
+     MANAGED_FORMULAE_BASE: |
+       existing-package
+       new-package-to-add    # Add your package here
+       another-package
+
+     MANAGED_CASKS_BASE: |
+       existing-cask
+       new-cask-to-add       # Add casks here
+   ```
+
+2. **Environment-specific packages** go in the appropriate vars:
+   - `MANAGED_FORMULAE_HOME` - Home environment only
+   - `MANAGED_FORMULAE_WORK` - Work environment only
+   - `MANAGED_CASKS_WORK` - Work casks (e.g., corporate apps)
+
+3. **Add installation logic** in the appropriate task file:
+   - `tasks/packages/cli.yml` - Terminal and shell tools
+   - `tasks/packages/development.yml` - Programming tools
+   - `tasks/packages/system.yml` - System utilities
+   - `tasks/packages/utils.yml` - General utilities
+
+4. **Re-run the audit** to verify:
+   ```bash
+   task audit
+   ```
+
+### Workflow Example
+
+```bash
+# 1. Run audit to see what's unmanaged
+task audit
+
+# 2. Review the output and decide what to keep
+#    - Add important packages to tasks/homebrew.yml
+#    - Remove unwanted packages: brew uninstall <package>
+
+# 3. Add installation tasks for the packages you're keeping
+#    Edit tasks/packages/*.yml files
+
+# 4. Verify everything is now managed
+task audit
+
+# 5. Commit your changes
+git add tasks/homebrew.yml tasks/packages/*.yml
+git commit -m "chore: add terraform and kubectl to managed packages"
+```
+
+### Generated Files
+
+The audit creates Brewfiles in `homebrew/` (gitignored):
+- `Brewfile.actual` - Current system state from `brew bundle dump`
+- `Brewfile.expected` - Generated from your managed package lists
+
+These files are temporary and regenerated each audit run.
 
 ## File Structure
 ```
@@ -118,7 +231,7 @@ Common tasks:
 ├── setup.sh              # User-friendly wrapper script
 ├── Taskfile.yml           # Main task orchestration
 ├── tasks/
-│   ├── homebrew.yml       # Homebrew installation
+│   ├── homebrew.yml       # Homebrew installation & audit
 │   ├── packages/
 │   │   ├── cli.yml        # CLI tools
 │   │   ├── development.yml # Dev tools (with Java handling)
@@ -128,6 +241,9 @@ Common tasks:
 │   └── environments/
 │       ├── work.yml       # Work-specific tasks
 │       └── home.yml       # Home-specific tasks
+├── homebrew/              # Generated Brewfiles (gitignored)
+│   ├── Brewfile.actual    # Current system state
+│   └── Brewfile.expected  # Managed package list
 ├── .config/               # Application configurations
 ├── .zshrc                 # Zsh configuration
 ├── .zshenv                # Zsh environment
