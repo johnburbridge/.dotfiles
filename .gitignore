@@ -1,4 +1,5 @@
 .config/**
+config/
 
 # Personal configuration files that should not be committed
 .gitconfig
