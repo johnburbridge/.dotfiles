@@ -108,13 +108,15 @@ printf '\033[2m ▸ \033[0m'
 # Context window progress bar (on same line)
 # ============================================================================
 
-# Extract context window data (use total_input_tokens to match /context)
-TOTAL_TOKENS=$(echo "$input" | jq -r '.context_window.total_input_tokens')
+# Extract context window data (sum input + output tokens to match /context)
+INPUT_TOKENS=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
+OUTPUT_TOKENS=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size')
 
 # Calculate percentage (matches /context calculation)
-if [ "$TOTAL_TOKENS" != "null" ] && [ "$TOTAL_TOKENS" -gt 0 ] 2>/dev/null; then
-    PERCENT=$((TOTAL_TOKENS * 100 / CONTEXT_SIZE))
+if [ "$CONTEXT_SIZE" -gt 0 ] 2>/dev/null; then
+    TOTAL=$((INPUT_TOKENS + OUTPUT_TOKENS))
+    PERCENT=$((TOTAL * 100 / CONTEXT_SIZE))
 else
     PERCENT=0
 fi
