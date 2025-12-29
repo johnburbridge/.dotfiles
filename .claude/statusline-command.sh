@@ -112,10 +112,14 @@ printf '\033[2m ▸ \033[0m'
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size')
 USAGE=$(echo "$input" | jq '.context_window.current_usage')
 
+# Reserve 45k tokens for output buffer (matches /context calculation)
+OUTPUT_BUFFER=45000
+USABLE_CONTEXT=$((CONTEXT_SIZE - OUTPUT_BUFFER))
+
 # Calculate percentage
 if [ "$USAGE" != "null" ]; then
     CURRENT=$(echo "$USAGE" | jq '.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens')
-    PERCENT=$((CURRENT * 100 / CONTEXT_SIZE))
+    PERCENT=$((CURRENT * 100 / USABLE_CONTEXT))
 else
     PERCENT=0
 fi
