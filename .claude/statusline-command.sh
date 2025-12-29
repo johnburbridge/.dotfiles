@@ -67,7 +67,10 @@ fi
 
 # Build Line 1 - Rainbow colors from red to violet
 # OS icon (red)
-printf '\033[31m%s \033[0m' "$os_icon"
+printf '\033[31m%s\033[0m' "$os_icon"
+
+# Separator
+printf '\033[2m ▸ \033[0m'
 
 # Hostname (orange - brighter, more distinct)
 printf '\033[38;5;214m%s\033[0m' "$hostname"
@@ -89,14 +92,17 @@ if [ -n "$git_branch" ]; then
   printf '\033[2m ▸ \033[0m'
 fi
 
-# Green dot (cyan/blue for rainbow progression)
-printf '\033[36m●\033[0m'
+# Status dot (deep blue for rainbow progression)
+printf '\033[34m●\033[0m'
 
 # Separator
 printf '\033[2m ▸ \033[0m'
 
-# Model name (indigo/blue)
-printf '\033[34m%s\033[0m' "$model"
+# Model name (light blue/indigo)
+printf '\033[38;5;39m%s\033[0m' "$model"
+
+# Separator
+printf '\033[2m ▸ \033[0m'
 
 # ============================================================================
 # Context window progress bar (on same line)
@@ -119,11 +125,8 @@ BAR_WIDTH=20
 filled=$((PERCENT * BAR_WIDTH / 100))
 empty=$((BAR_WIDTH - filled))
 
-# Space before progress bar
-printf ' '
-
-# Violet/magenta color for the progress bar (completing the rainbow)
-printf '\033[35m'
+# Purple/violet color for the progress bar (completing the rainbow)
+printf '\033[38;5;141m'
 
 # Left cap (filled if any progress, else empty)
 if [ $filled -gt 0 ]; then
