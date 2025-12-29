@@ -109,10 +109,13 @@ printf '\033[2m ▸ \033[0m'
 # ============================================================================
 
 # Extract context window data (use current_usage for actual context, not cumulative)
+# NOTE: This shows tokens from the LAST API call, not the full conversation context.
+# The statusLine API doesn't expose the internal context state that /context shows.
+# This is a known API limitation - the percentage may not exactly match /context.
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size')
 USAGE=$(echo "$input" | jq '.context_window.current_usage')
 
-# Calculate percentage (matches /context calculation)
+# Calculate percentage (best approximation available)
 if [ "$USAGE" != "null" ] && [ "$CONTEXT_SIZE" -gt 0 ] 2>/dev/null; then
     INPUT=$(echo "$USAGE" | jq -r '.input_tokens // 0')
     OUTPUT=$(echo "$USAGE" | jq -r '.output_tokens // 0')
