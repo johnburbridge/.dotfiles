@@ -49,3 +49,4 @@ export OTEL_LOGS_EXPORTER=otlp
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 export OTEL_METRIC_EXPORT_INTERVAL=10000  # 10s for faster feedback
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
