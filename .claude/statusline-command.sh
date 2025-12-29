@@ -108,14 +108,17 @@ printf '\033[2m ▸ \033[0m'
 # Context window progress bar (on same line)
 # ============================================================================
 
-# Extract context window data (sum input + output tokens to match /context)
-INPUT_TOKENS=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
-OUTPUT_TOKENS=$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')
+# Extract context window data (use current_usage for actual context, not cumulative)
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size')
+USAGE=$(echo "$input" | jq '.context_window.current_usage')
 
 # Calculate percentage (matches /context calculation)
-if [ "$CONTEXT_SIZE" -gt 0 ] 2>/dev/null; then
-    TOTAL=$((INPUT_TOKENS + OUTPUT_TOKENS))
+if [ "$USAGE" != "null" ] && [ "$CONTEXT_SIZE" -gt 0 ] 2>/dev/null; then
+    INPUT=$(echo "$USAGE" | jq -r '.input_tokens // 0')
+    OUTPUT=$(echo "$USAGE" | jq -r '.output_tokens // 0')
+    CACHE_CREATE=$(echo "$USAGE" | jq -r '.cache_creation_input_tokens // 0')
+    CACHE_READ=$(echo "$USAGE" | jq -r '.cache_read_input_tokens // 0')
+    TOTAL=$((INPUT + OUTPUT + CACHE_CREATE + CACHE_READ))
     PERCENT=$((TOTAL * 100 / CONTEXT_SIZE))
 else
     PERCENT=0
