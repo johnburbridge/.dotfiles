@@ -16,7 +16,7 @@ alias la='l -a'
 alias lah='la -h'
 alias k=kubectl
 alias t=task
-
+alias glow='glow -p -w 120'
 #eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # export STARSHIP_CONFIG=~/.config/starship-gruvbox.toml
