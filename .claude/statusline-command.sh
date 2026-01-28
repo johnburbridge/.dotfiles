@@ -14,19 +14,19 @@ model=$(echo "$input" | jq -r '.model.display_name')
 # Get hostname
 hostname=$(hostname -s)
 
-# Get OS icon (using Nerd Font icons)
+# Get OS icon (using Nerd Font icons with UTF-8 byte sequences for bash 3.2 compatibility)
 case "$(uname -s)" in
   Darwin)
-    os_icon=$'\uf179'  # macOS icon
+    os_icon=$'\xef\x85\xb9'  # macOS Nerd Font icon (U+F179)
     ;;
   Linux)
-    os_icon=$'\uf17c'
+    os_icon=$'\xef\x85\xbc'  # Linux Nerd Font icon (U+F17C)
     ;;
   CYGWIN*|MINGW*|MSYS*)
-    os_icon=$'\uf17a'
+    os_icon=$'\xef\x85\xba'  # Windows Nerd Font icon (U+F17A)
     ;;
   *)
-    os_icon=$'\uf109'
+    os_icon=$'\xef\x84\x89'  # Generic computer icon (U+F109)
     ;;
 esac
 
@@ -127,35 +127,25 @@ else
     PERCENT=0
 fi
 
-# Build progress bar using Nerd Fonts glyphs
+# Build progress bar using simple ASCII characters
 BAR_WIDTH=20
 filled=$((PERCENT * BAR_WIDTH / 100))
 empty=$((BAR_WIDTH - filled))
 
 # Purple/violet color for the progress bar (completing the rainbow)
-printf '\033[38;5;141m'
+printf '\033[38;5;141m['
 
-# Left cap (filled if any progress, else empty)
-if [ $filled -gt 0 ]; then
-    printf $'\uee03'  # filled left
-else
-    printf $'\uee00'  # empty left
-fi
-
-# Middle segments
-for ((i=0; i<filled && i<BAR_WIDTH; i++)); do
-    printf $'\uee04'  # filled mid
+# Filled segments
+for ((i=0; i<filled; i++)); do
+    printf '█'
 done
+
+# Empty segments
 for ((i=0; i<empty; i++)); do
-    printf $'\uee01'  # empty mid
+    printf '░'
 done
 
-# Right cap (filled if 100%, else empty)
-if [ $PERCENT -ge 100 ]; then
-    printf $'\uee05'  # filled right
-else
-    printf $'\uee02'  # empty right
-fi
+printf ']'
 
 # Percentage
 printf ' %d%%\033[0m' "$PERCENT"
